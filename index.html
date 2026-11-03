@@ -17,7 +17,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6}
 a{color:inherit}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-header{background:var(--pitch);color:#fff;position:sticky;top:0;z-index:20}
+header{background:#0d6b3a;color:#fff;position:sticky;top:0;z-index:20}
 header .wrap{display:flex;align-items:center;gap:16px;min-height:56px;flex-wrap:wrap}
 .logo{font-weight:700;font-size:1.4rem;text-decoration:none;margin-right:auto}
 nav{display:flex;gap:4px;overflow-x:auto}
@@ -108,7 +108,9 @@ header .wrap{flex-wrap:nowrap;gap:10px}
 .livebtn i{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.4s infinite}
 nav{flex:1;min-width:0;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
-#theme{flex:none;width:40px;height:36px;padding:0;font-size:1.1rem;line-height:1;text-align:center}
+#theme{flex:none;min-width:68px;height:34px;padding:0 14px;font-size:.85rem;font-weight:600;line-height:1;text-align:center;background:transparent;border:1px solid rgba(255,255,255,.65);border-radius:99px;color:#fff}
+#theme:hover{background:rgba(255,255,255,.16)}
+.livebtn[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.livebtn i{animation:none}}
 .adm,.adm-i{display:none!important}
 body.admin .adm{display:block!important}
@@ -138,9 +140,9 @@ footer a{color:var(--pitch)}
 <body>
 <header><div class="wrap">
 <a class="logo" href="#top"><span>⚽</span> KickOff<b>BD</b> <small class="adm-i" style="font-weight:500;opacity:.85;font-size:.7rem">OWNER VIEW</small></a>
-<a class="livebtn" id="liveBtn" href="#scores" aria-label="Go to live scores"><i></i>LIVE<span id="liveN"></span></a>
+<a class="livebtn" id="liveBtn" href="#scores" hidden aria-label="Go to live scores"><i></i>LIVE<span id="liveN"></span></a>
 <nav aria-label="Main menu"><a href="#scores">Scores</a><a href="#watch">Where to watch</a><a href="#highlights">Highlights</a><a href="#players">Players</a><a href="#table">Table</a></nav>
-<button id="theme" type="button" aria-label="Switch to dark mode">🌙</button>
+<button id="theme" type="button" aria-label="Switch to dark mode">Dark</button>
 </div></header>
 
 <main id="top"><div class="wrap">
@@ -356,11 +358,18 @@ function drawW(){
 /* Matches */
 var all=[],cur="all";
 function drawTabs(){
- $("tabs").innerHTML='<button class="tab" aria-pressed="'+(cur==="all")+'" data-l="all">All</button><button class="tab" aria-pressed="'+(cur==="live")+'" data-l="live">● Live</button>'+Object.keys(LG).map(function(k){return'<button class="tab" aria-pressed="'+(cur===k)+'" data-l="'+k+'">'+LG[k]+'</button>'}).join("");
+ $("tabs").innerHTML='<button class="tab" aria-pressed="'+(cur==="all")+'" data-l="all">All</button>'+(all.filter(isLive).length?'<button class="tab" aria-pressed="'+(cur==="live")+'" data-l="live">● Live</button>':"")+Object.keys(LG).map(function(k){return'<button class="tab" aria-pressed="'+(cur===k)+'" data-l="'+k+'">'+LG[k]+'</button>'}).join("");
 }
 function ymd(d){return d.toISOString().slice(0,10)}
 function isLive(m){return m.status==="IN_PLAY"||m.status==="PAUSED"}
-function updLive(){var n=all.filter(isLive).length;$("liveN").textContent=n?" · "+n:""}
+var liveShown=false;
+function updLive(){
+ var n=all.filter(isLive).length,ch=false;
+ $("liveN").textContent=n?" · "+n:"";$("liveBtn").hidden=!n;
+ if(!n&&cur==="live"){cur="all";ch=true}
+ if((n>0)!==liveShown){liveShown=n>0;ch=true}
+ if(ch)drawTabs();
+}
 function drawM(){
  updLive();var l=all.filter(function(m){return cur==="all"?true:cur==="live"?isLive(m):m.competition.code===cur});
  $("matches").innerHTML=l.length?l.map(function(m){
@@ -430,7 +439,7 @@ $("ct").innerHTML=Object.keys(C).map(function(k){return'<option value="'+k+'">'+
 $("ct").value=CT;
 $("ct").addEventListener("change",function(){CT=this.value;try{localStorage.setItem("gh:country",CT)}catch(e){}drawW();if(all.length)drawM()});
 drawW();
-function setTheme(t){document.documentElement.dataset.theme=t;$("theme").textContent=t==="dark"?"☀️":"🌙";$("theme").setAttribute("aria-label",t==="dark"?"Switch to light mode":"Switch to dark mode")}
+function setTheme(t){document.documentElement.dataset.theme=t;$("theme").textContent=t==="dark"?"Light":"Dark";$("theme").setAttribute("aria-label",t==="dark"?"Switch to light mode":"Switch to dark mode")}
 var th="light";try{th=localStorage.getItem("gh:theme")==="dark"?"dark":"light"}catch(e){}
 setTheme(th);
 $("theme").addEventListener("click",function(){th=th==="dark"?"light":"dark";setTheme(th);try{localStorage.setItem("gh:theme",th)}catch(e){}});
